@@ -46,7 +46,15 @@ router.patch('/:uuid', function (req, res) {
     //Remove songs from playlist
 
     //Add songs to playlist
-    sequelize.query('DO $do$ BEGIN IF EXISTS (SELECT * FROM playlists WHERE id = :playlist AND "userId" = :user) THEN INSERT INTO song_playlist SELECT NOW(), NOW(), id, :playlist FROM songs WHERE songs."userId" = :user AND songs.id IN(:songs);END IF;END $do$;',
+    sequelize.query('DO ' +
+        '$do$ ' +
+        'BEGIN ' +
+        'IF EXISTS (SELECT * FROM playlists WHERE id = :playlist AND "userId" = :user) ' +
+        'THEN ' +
+        'INSERT INTO song_playlist SELECT NOW(), NOW(), id, :playlist FROM songs WHERE songs."userId" = :user AND songs.id IN(:songs);' +
+        'END IF;' +
+        'END ' +
+        '$do$;',
         {
             replacements: {
                 playlist: uuid,
