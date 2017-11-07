@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const models = require('../../../db/models');
+const status = require('http-status-codes');
 
 router.get('/', (req, res) => {
     res.header('Access-Control-Allow-Origin', '*');
@@ -13,8 +14,8 @@ router.get('/', (req, res) => {
             userId: userId
         }
     })
-        .then(playlists => res.status(200).send(playlists))
-        .catch(() => res.status(500).send());
+        .then(playlists => res.status(status.OK).send(playlists))
+        .catch(() => res.status(status.NOT_FOUND).send());
 });
 
 router.get('/:id', (req, res) => {
@@ -29,8 +30,8 @@ router.get('/:id', (req, res) => {
             userId: userId
         }
     })
-        .then(playlist => res.status(200).send(playlist))
-        .catch(() => res.status(500).send());
+        .then(playlist => res.status(status.OK).send(playlist))
+        .catch(() => res.status(status.NOT_FOUND).send());
 });
 
 router.post('/', (req, res) => {
@@ -44,8 +45,27 @@ router.post('/', (req, res) => {
     models.playlist.create(req.body, {
         validate: true
     })
-        .then(() => res.status(200).send())
-        .catch(() => res.status(500).send());
+        .then(() => res.status(status.CREATED).send())
+        .catch(() => res.status(status.BAD_REQUEST).send());
+});
+
+router.put('/:id', (req, res) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    let token = req.header('Authorization');
+    //Do something with token and get user id
+    let userId = 'd9886952-0d27-43bd-aa19-1c9c3900411d';
+
+    delete req.body.id;
+    delete req.body.userId;
+    models.playlist.update(req.body, {
+        where: {
+            id: req.params.id,
+            userId: userId
+        },
+        validate: true
+    })
+        .then(([rows, instances]) => res.status(rows ? status.OK : status.NOT_FOUND).send())
+        .catch(() => res.status(status.BAD_REQUEST).send());
 });
 
 router.delete('/:id', (req, res) => {
@@ -60,8 +80,8 @@ router.delete('/:id', (req, res) => {
             userId: userId
         }
     })
-        .then(() => res.status(200).send())
-        .catch(() => res.status(500).send());
+        .then((rows) => res.status(rows ? status.OK : status.NOT_FOUND).send())
+        .catch(() => res.status(status.BAD_REQUEST).send());
 });
 
 router.use('/:playlistId/songs', require('./songs'));

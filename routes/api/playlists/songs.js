@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router({mergeParams: true});
 const models = require('../../../db/models');
+const status = require('http-status-codes');
 
 router.get('/', (req, res) => {
     res.header('Access-Control-Allow-Origin', '*');
@@ -15,8 +16,8 @@ router.get('/', (req, res) => {
         }
     })
         .then(playlist => playlist.getSongs())
-        .then(songs => res.status(200).send(songs))
-        .catch(() => res.status(500).send());
+        .then(songs => res.status(status.OK).send(songs))
+        .catch(() => res.status(status.NOT_FOUND).send());
 });
 
 router.post('/:id?', (req, res) => {
@@ -40,8 +41,8 @@ router.post('/:id?', (req, res) => {
         })
     ])
         .then(([playlist, songs]) => playlist.addSongs(songs))
-        .then(() => res.status(200).send())
-        .catch(() => res.status(500).send());
+        .then(() => res.status(status.CREATED).send())
+        .catch(() => res.status(status.BAD_REQUEST).send());
 });
 
 router.delete('/:id?', (req, res) => {
@@ -65,8 +66,8 @@ router.delete('/:id?', (req, res) => {
         })
     ])
         .then(([playlist, songs]) => playlist.removeSongs(songs))
-        .then(() => res.status(200).send())
-        .catch(() => res.status(500).send());
+        .then((rows) => res.status(rows ? status.OK : status.NOT_FOUND).send())
+        .catch(() => res.status(status.BAD_REQUEST).send());
 });
 
 module.exports = router;
