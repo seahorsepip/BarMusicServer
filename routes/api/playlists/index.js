@@ -1,6 +1,6 @@
-const express = require('express');
-const router = express.Router();
-const models = require('../../db/models');
+var express = require('express');
+var router = express.Router();
+var models = require('../../../db/models');
 
 router.get('/', (req, res) => {
     res.header('Access-Control-Allow-Origin', '*');
@@ -8,12 +8,12 @@ router.get('/', (req, res) => {
     //Do something with token and get user id
     let userId = 'd9886952-0d27-43bd-aa19-1c9c3900411d';
 
-    models.song.findAll({
+    models.playlist.findAll({
         where: {
             userId: userId
         }
     })
-        .then(songs => res.status(200).send(songs))
+        .then(playlists => res.status(200).send(playlists))
         .catch(() => res.status(500).send());
 });
 
@@ -23,13 +23,13 @@ router.get('/:id', (req, res) => {
     //Do something with token and get user id
     let userId = 'd9886952-0d27-43bd-aa19-1c9c3900411d';
 
-    models.song.find({
+    models.playlist.find({
         where: {
             id: req.params.id,
             userId: userId
         }
     })
-        .then(song => res.status(200).send(song))
+        .then(playlist => res.status(200).send(playlist))
         .catch(() => res.status(500).send());
 });
 
@@ -39,31 +39,31 @@ router.post('/', (req, res) => {
     //Do something with token and get user id
     let userId = 'd9886952-0d27-43bd-aa19-1c9c3900411d';
 
-    req.body.map(song => {
-        delete song.id;
-        song.userId = userId;
-    });
-    models.song.bulkCreate(req.body, {
+    delete req.body.id;
+    req.body.userId = userId;
+    models.playlist.create(req.body, {
         validate: true
     })
         .then(() => res.status(200).send())
         .catch(() => res.status(500).send());
 });
 
-router.delete('/:id?', (req, res) => {
+router.delete('/:id', (req, res) => {
     res.header('Access-Control-Allow-Origin', '*');
     let token = req.header('Authorization');
     //Do something with token and get user id
     let userId = 'd9886952-0d27-43bd-aa19-1c9c3900411d';
 
-    models.song.destroy({
+    models.playlist.destroy({
         where: {
-            id: req.params.id ? req.params.id : req.body,
+            id: req.params.id,
             userId: userId
         }
     })
         .then(() => res.status(200).send())
         .catch(() => res.status(500).send());
 });
+
+router.use('/:playlistId/songs', require('./songs'));
 
 module.exports = router;
