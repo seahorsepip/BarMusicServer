@@ -1,8 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var models = {
-    song: require('../../models/song').Song
-};
+var models = require('../../db/models');
 
 router.get('/', function (req, res) {
     res.header('Access-Control-Allow-Origin', '*');
@@ -19,16 +17,15 @@ router.get('/', function (req, res) {
     });
 });
 
-router.get('/:uuid', function (req, res) {
+router.get('/:id', function (req, res) {
     res.header('Access-Control-Allow-Origin', '*');
     var token = req.header('Authorization');
     //Do something with token and get user id
     var userId = 'd9886952-0d27-43bd-aa19-1c9c3900411d';
-    var uuid = req.params.uuid;
 
     models.song.find({
         where: {
-            id: uuid,
+            id: req.params.id,
             userId: userId
         }
     }).then(function (songs) {

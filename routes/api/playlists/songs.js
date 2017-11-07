@@ -2,7 +2,6 @@ var express = require('express');
 var router = express.Router({mergeParams: true});
 var sequelize = require('sequelize');
 var models = require('../../../db/models');
-models.establishFKs();
 
 router.get('/', function (req, res) {
     res.header('Access-Control-Allow-Origin', '*');
