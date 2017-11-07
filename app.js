@@ -5,7 +5,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var app = express();
 
-require('./db/foreignkeys').estabilishFKs();
+//require('./db/models').establishFKs();
 //require('./db/database').sync({force: true});
 
 app.use(logger('dev'));

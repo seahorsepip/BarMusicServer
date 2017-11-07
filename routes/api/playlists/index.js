@@ -1,8 +1,8 @@
 var express = require('express');
 var router = express.Router();
-var models = {
-    song: require('../../models/song').Song
-};
+var sequelize = require('sequelize');
+var models = require('../../../db/models');
+models.establishFKs();
 
 router.get('/', function (req, res) {
     res.header('Access-Control-Allow-Origin', '*');
@@ -10,13 +10,15 @@ router.get('/', function (req, res) {
     //Do something with token and get user id
     var userId = 'd9886952-0d27-43bd-aa19-1c9c3900411d';
 
-    models.song.findAll({
+    models.playlist.findAll({
         where: {
             userId: userId
         }
-    }).then(function (songs) {
-        res.send(songs);
-    });
+    }).then(function (playlists) {
+        res.status(200).send(playlists);
+    }).catch(function () {
+        res.status(500).send();
+    })
 });
 
 router.get('/:uuid', function (req, res) {
@@ -26,14 +28,16 @@ router.get('/:uuid', function (req, res) {
     var userId = 'd9886952-0d27-43bd-aa19-1c9c3900411d';
     var uuid = req.params.uuid;
 
-    models.song.find({
+    models.playlist.find({
         where: {
             id: uuid,
             userId: userId
         }
-    }).then(function (songs) {
-        res.send(songs);
-    });
+    }).then(function (playlist) {
+        res.status(200).send(playlist);
+    }).catch(function () {
+        res.status(500).send();
+    })
 });
 
 router.post('/', function (req, res) {
@@ -42,33 +46,34 @@ router.post('/', function (req, res) {
     //Do something with token and get user id
     var userId = 'd9886952-0d27-43bd-aa19-1c9c3900411d';
 
-    req.body.map(function (song) {
-        delete song.id;
-        song.userId = userId;
-    });
-    models.song.bulkCreate(req.body, {validate: true}).then(function () {
+    delete req.body.id;
+    req.body.userId = userId;
+    models.playlist.create(req.body, {validate: true}).then(function () {
         res.status(200).send();
-    }).catch(function (error) {
+    }).catch(function () {
         res.status(500).send();
     });
 });
 
-router.delete('/', function (req, res) {
+router.delete('/:uuid', function (req, res) {
     res.header('Access-Control-Allow-Origin', '*');
     var token = req.header('Authorization');
     //Do something with token and get user id
     var userId = 'd9886952-0d27-43bd-aa19-1c9c3900411d';
+    var uuid = req.params.uuid;
 
-    models.song.destroy({
+    models.playlist.destroy({
         where: {
-            id: req.body,
+            id: uuid,
             userId: userId
         }
     }).then(function () {
         res.status(200).send();
-    }).catch(function (error) {
+    }).catch(function () {
         res.status(500).send();
     });
 });
+
+router.use('/:uuid/songs', require('./songs'));
 
 module.exports = router;
