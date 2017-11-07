@@ -1,6 +1,6 @@
-var express = require('express');
-var router = express.Router();
-var models = require('../../../db/models');
+const express = require('express');
+const router = express.Router();
+const models = require('../../../db/models');
 
 router.get('/', (req, res) => {
     res.header('Access-Control-Allow-Origin', '*');

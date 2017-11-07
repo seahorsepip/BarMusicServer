@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router({mergeParams: true});
-const sequelize = require('sequelize');
 const models = require('../../../db/models');
 
 router.get('/', (req, res) => {
@@ -51,7 +50,7 @@ router.delete('/:id?', (req, res) => {
     //Do something with token and get user id
     let userId = 'd9886952-0d27-43bd-aa19-1c9c3900411d';
 
-    sequelize.Promise.all([
+    Promise.all([
         models.playlist.find({
             where: {
                 id: req.params.playlistId,
