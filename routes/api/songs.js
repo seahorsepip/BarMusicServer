@@ -19,7 +19,7 @@ router.get('/', (req, res) => {
 });
 
 router.get('/:id', (req, res) => {
-    res.header('Access-Control-Allow-Origin', 'fix');
+    res.header('Access-Control-Allow-Origin', '*');
     let token = req.header('Authorization');
     //Do something with token and get user id
     let userId = 'd9886952-0d27-43bd-aa19-1c9c3900411d';
