@@ -1,17 +1,18 @@
 var express = require('express');
-var router = express.Router({ mergeParams: true });
-var models = require('../../../db/models')
+var router = express.Router({mergeParams: true});
+var sequelize = require('sequelize');
+var models = require('../../../db/models');
+models.establishFKs();
 
 router.get('/', function (req, res) {
     res.header('Access-Control-Allow-Origin', '*');
     var token = req.header('Authorization');
     //Do something with token and get user id
     var userId = 'd9886952-0d27-43bd-aa19-1c9c3900411d';
-    var uuid = req.params.uuid;
 
     models.playlist.find({
         where: {
-            id: uuid,
+            id: req.params.playlistId,
             userId: userId
         }
     }).then(function (playlist) {
@@ -23,23 +24,22 @@ router.get('/', function (req, res) {
     });
 });
 
-router.post('/', function (req, res) {
+router.post('/:id?', function (req, res) {
     res.header('Access-Control-Allow-Origin', '*');
     var token = req.header('Authorization');
     //Do something with token and get user id
     var userId = 'd9886952-0d27-43bd-aa19-1c9c3900411d';
-    var uuid = req.params.uuid;
 
     sequelize.Promise.all([
         models.playlist.find({
             where: {
-                id: uuid,
+                id: req.params.playlistId,
                 userId: userId
             }
         }),
         models.song.findAll({
             where: {
-                id: req.body,
+                id: req.params.id ? req.params.id : req.body,
                 userId: userId
             }
         })
@@ -52,23 +52,22 @@ router.post('/', function (req, res) {
     });
 });
 
-router.delete('/', function (req, res) {
+router.delete('/:id?', function (req, res) {
     res.header('Access-Control-Allow-Origin', '*');
     var token = req.header('Authorization');
     //Do something with token and get user id
     var userId = 'd9886952-0d27-43bd-aa19-1c9c3900411d';
-    var uuid = req.params.uuid;
 
     sequelize.Promise.all([
         models.playlist.find({
             where: {
-                id: uuid,
+                id: req.params.playlistId,
                 userId: userId
             }
         }),
         models.song.findAll({
             where: {
-                id: req.body,
+                id: req.params.id ? req.params.id : req.body,
                 userId: userId
             }
         })
