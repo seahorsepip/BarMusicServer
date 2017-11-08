@@ -15,7 +15,7 @@ router.get('/', (req, res) => {
         }
     })
         .then(songs => res.status(status.OK).send(songs))
-        .catch(() => res.status(status.BAD_REQUEST).send());
+        .catch(error => res.status(status.BAD_REQUEST).send(error));
 });
 
 router.get('/:id', (req, res) => {
@@ -31,7 +31,7 @@ router.get('/:id', (req, res) => {
         }
     })
         .then(song => res.status(status.OK).send(song))
-        .catch(() => res.status(status.NOT_FOUND).send());
+        .catch(error => res.status(status.NOT_FOUND).send(error));
 });
 
 router.post('/', (req, res) => {
@@ -40,15 +40,17 @@ router.post('/', (req, res) => {
     //Do something with token and get user id
     let userId = 'd9886952-0d27-43bd-aa19-1c9c3900411d';
 
+    if(!Array.isArray(req.body)) req.body = [req.body];
     req.body.map(song => {
         delete song.id;
         song.userId = userId;
     });
     models.song.bulkCreate(req.body, {
-        validate: true
+        validate: true,
+        returning: true
     })
-        .then(() => res.status(status.CREATED).send())
-        .catch(() => res.status(status.BAD_REQUEST).send());
+        .then(songs => res.status(status.CREATED).send(songs.length > 1 ? songs : songs[0]))
+        .catch(error => res.status(status.BAD_REQUEST).send(error));
 });
 
 router.delete('/:id?', (req, res) => {
@@ -64,7 +66,7 @@ router.delete('/:id?', (req, res) => {
         }
     })
         .then((rows) => res.status(rows ? status.OK : status.NOT_FOUND).send())
-        .catch(() => res.status(status.BAD_REQUEST).send());
+        .catch(error => res.status(status.BAD_REQUEST).send(error));
 });
 
 module.exports = router;

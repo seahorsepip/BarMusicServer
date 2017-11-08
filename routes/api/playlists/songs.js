@@ -17,7 +17,7 @@ router.get('/', (req, res) => {
     })
         .then(playlist => playlist.getSongs())
         .then(songs => res.status(status.OK).send(songs))
-        .catch(() => res.status(status.NOT_FOUND).send());
+        .catch(error => res.status(status.NOT_FOUND).send(error));
 });
 
 router.post('/:id?', (req, res) => {
@@ -41,8 +41,8 @@ router.post('/:id?', (req, res) => {
         })
     ])
         .then(([playlist, songs]) => playlist.addSongs(songs))
-        .then(() => res.status(status.CREATED).send())
-        .catch(() => res.status(status.BAD_REQUEST).send());
+        .then(songs => res.status(songs.length ? status.CREATED : status.NOT_FOUND).send(songs.length ? songs.length > 1 ? songs[0] : songs[0][0] : null))
+        .catch(error => res.status(status.BAD_REQUEST).send(error));
 });
 
 router.delete('/:id?', (req, res) => {
@@ -66,8 +66,8 @@ router.delete('/:id?', (req, res) => {
         })
     ])
         .then(([playlist, songs]) => playlist.removeSongs(songs))
-        .then((rows) => res.status(rows ? status.OK : status.NOT_FOUND).send())
-        .catch(() => res.status(status.BAD_REQUEST).send());
+        .then(rows => res.status(rows ? status.OK : status.NOT_FOUND).send())
+        .catch(error => res.status(status.BAD_REQUEST).send(error));
 });
 
 module.exports = router;

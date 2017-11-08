@@ -15,7 +15,7 @@ router.get('/', (req, res) => {
         }
     })
         .then(playlists => res.status(status.OK).send(playlists))
-        .catch(() => res.status(status.NOT_FOUND).send());
+        .catch(error => res.status(status.NOT_FOUND).send(error));
 });
 
 router.get('/:id', (req, res) => {
@@ -31,7 +31,7 @@ router.get('/:id', (req, res) => {
         }
     })
         .then(playlist => res.status(status.OK).send(playlist))
-        .catch(() => res.status(status.NOT_FOUND).send());
+        .catch(error => res.status(status.NOT_FOUND).send(error));
 });
 
 router.post('/', (req, res) => {
@@ -45,8 +45,8 @@ router.post('/', (req, res) => {
     models.playlist.create(req.body, {
         validate: true
     })
-        .then(() => res.status(status.CREATED).send())
-        .catch(() => res.status(status.BAD_REQUEST).send());
+        .then(playlist => res.status(status.CREATED).send(playlist))
+        .catch(error => res.status(status.BAD_REQUEST).send(error));
 });
 
 router.put('/:id', (req, res) => {
@@ -62,10 +62,11 @@ router.put('/:id', (req, res) => {
             id: req.params.id,
             userId: userId
         },
-        validate: true
+        validate: true,
+        returning: true
     })
-        .then(([rows, instances]) => res.status(rows ? status.OK : status.NOT_FOUND).send())
-        .catch(() => res.status(status.BAD_REQUEST).send());
+        .then(([rows, playlists]) => res.status(rows ? status.OK : status.NOT_FOUND).send(rows ? playlists[0] : null))
+        .catch(error => res.status(status.BAD_REQUEST).send(error));
 });
 
 router.delete('/:id', (req, res) => {
@@ -80,8 +81,8 @@ router.delete('/:id', (req, res) => {
             userId: userId
         }
     })
-        .then((rows) => res.status(rows ? status.OK : status.NOT_FOUND).send())
-        .catch(() => res.status(status.BAD_REQUEST).send());
+        .then(rows => res.status(rows ? status.OK : status.NOT_FOUND).send())
+        .catch(error => res.status(status.BAD_REQUEST).send(error));
 });
 
 router.use('/:playlistId/songs', require('./songs'));

@@ -1,4 +1,4 @@
-var models = {
+const models = {
     song: require('../models/song').Song,
     playlist: require('../models/playlist').Playlist,
     songPlaylist: require('../models/songPlaylist').SongPlaylist
@@ -6,13 +6,11 @@ var models = {
 
 models.song.belongsToMany(models.playlist, {
     through: models.songPlaylist,
-    foreignKey: 'song_id',
     constraints: false
 });
 
 models.playlist.belongsToMany(models.song, {
     through: models.songPlaylist,
-    foreignKey: 'playlist_id',
     constraints: false
 });
 
