@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const models = require('../../db/models');
+const status = require('http-status-codes');
 
 router.get('/', (req, res) => {
     res.header('Access-Control-Allow-Origin', '*');
@@ -13,8 +14,8 @@ router.get('/', (req, res) => {
             userId: userId
         }
     })
-        .then(songs => res.status(200).send(songs))
-        .catch(() => res.status(500).send());
+        .then(songs => res.status(status.OK).send(songs))
+        .catch(error => res.status(status.BAD_REQUEST).send(error));
 });
 
 router.get('/:id', (req, res) => {
@@ -29,8 +30,8 @@ router.get('/:id', (req, res) => {
             userId: userId
         }
     })
-        .then(song => res.status(200).send(song))
-        .catch(() => res.status(500).send());
+        .then(song => res.status(status.OK).send(song))
+        .catch(error => res.status(status.NOT_FOUND).send(error));
 });
 
 router.post('/', (req, res) => {
@@ -39,15 +40,17 @@ router.post('/', (req, res) => {
     //Do something with token and get user id
     let userId = 'd9886952-0d27-43bd-aa19-1c9c3900411d';
 
+    if(!Array.isArray(req.body)) req.body = [req.body];
     req.body.map(song => {
         delete song.id;
         song.userId = userId;
     });
     models.song.bulkCreate(req.body, {
-        validate: true
+        validate: true,
+        returning: true
     })
-        .then(() => res.status(200).send())
-        .catch(() => res.status(500).send());
+        .then(songs => res.status(status.CREATED).send(songs.length > 1 ? songs : songs[0]))
+        .catch(error => res.status(status.BAD_REQUEST).send(error));
 });
 
 router.delete('/:id?', (req, res) => {
@@ -62,8 +65,8 @@ router.delete('/:id?', (req, res) => {
             userId: userId
         }
     })
-        .then(() => res.status(200).send())
-        .catch(() => res.status(500).send());
+        .then((rows) => res.status(rows ? status.OK : status.NOT_FOUND).send())
+        .catch(error => res.status(status.BAD_REQUEST).send(error));
 });
 
 module.exports = router;
