@@ -1,3 +1,2 @@
-var database = require('../db/database');
-var types = require('sequelize').DataTypes;
+const database = require('../db/database');
 module.exports.SongPlaylist = database.define('songs_playlists');

@@ -4,8 +4,9 @@ const logger = require('morgan');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const app = express();
+const cors = require('cors')
 
-//require('./db/models')
+//require('./db/models');
 //require('./db/database').sync({force: true});
 
 app.use(logger('dev'));
@@ -13,7 +14,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(cors());
 app.use('/', require('./routes/index'));
 app.use('/api', require('./routes/api/index'));
 
@@ -21,7 +22,7 @@ app.use('/api', require('./routes/api/index'));
 app.use((req, res, next) => {
     let err = new Error('Not Found');
     err.status = 404;
-    next(err);
+    next(err);//
 });
 
 // error handler

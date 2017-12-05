@@ -2,87 +2,66 @@ const express = require('express');
 const router = express.Router();
 const models = require('../../../db/models');
 const status = require('http-status-codes');
+const authorization = require('../../../lib/authorization');
 
-router.get('/', (req, res) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    let token = req.header('Authorization');
-    //Do something with token and get user id
-    let userId = 'd9886952-0d27-43bd-aa19-1c9c3900411d';
-
-    models.playlist.findAll({
-        where: {
-            userId: userId
-        }
-    })
-        .then(playlists => res.status(status.OK).send(playlists))
-        .catch(error => res.status(status.NOT_FOUND).send(error));
+router.get('/:id?', async (req, res) => {
+    let where = {};
+    if (req.params.id) where.id = req.params.id;
+    if (req.query.userId) where.userId = req.query.userId;
+    try {
+        let playlists = await models.playlist.findAll({
+            attributes: ['id', 'name'],
+            where: where
+        });
+        res.status(status.OK).send(playlists);
+    } catch (error) {
+        res.status(status.NOT_FOUND).send(error);
+    }
 });
 
-router.get('/:id', (req, res) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    let token = req.header('Authorization');
-    //Do something with token and get user id
-    let userId = 'd9886952-0d27-43bd-aa19-1c9c3900411d';
-
-    models.playlist.find({
-        where: {
-            id: req.params.id,
-            userId: userId
-        }
-    })
-        .then(playlist => res.status(status.OK).send(playlist))
-        .catch(error => res.status(status.NOT_FOUND).send(error));
+router.post('/', authorization, async (req, res) => {
+    try {
+        delete req.body.id;
+        req.body.userId = req.userId;
+        let playlist = await models.playlist.create(req.body, {
+            validate: true
+        });
+        res.status(status.CREATED).send(playlist);
+    } catch (error) {
+        res.status(status.BAD_REQUEST).send(error);
+    }
 });
 
-router.post('/', (req, res) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    let token = req.header('Authorization');
-    //Do something with token and get user id
-    let userId = 'd9886952-0d27-43bd-aa19-1c9c3900411d';
-
-    delete req.body.id;
-    req.body.userId = userId;
-    models.playlist.create(req.body, {
-        validate: true
-    })
-        .then(playlist => res.status(status.CREATED).send(playlist))
-        .catch(error => res.status(status.BAD_REQUEST).send(error));
+router.put('/:id', authorization, async (req, res) => {
+    try {
+        delete req.body.id;
+        delete req.body.userId;
+        let [rows, playlists] = await models.playlist.update(req.body, {
+            where: {
+                id: req.params.id,
+                userId: req.userId
+            },
+            validate: true,
+            returning: true
+        });
+        res.status(rows ? status.OK : status.NOT_FOUND).send(rows ? playlists[0] : null);
+    } catch (error) {
+        res.status(status.BAD_REQUEST).send(error);
+    }
 });
 
-router.put('/:id', (req, res) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    let token = req.header('Authorization');
-    //Do something with token and get user id
-    let userId = 'd9886952-0d27-43bd-aa19-1c9c3900411d';
-
-    delete req.body.id;
-    delete req.body.userId;
-    models.playlist.update(req.body, {
-        where: {
-            id: req.params.id,
-            userId: userId
-        },
-        validate: true,
-        returning: true
-    })
-        .then(([rows, playlists]) => res.status(rows ? status.OK : status.NOT_FOUND).send(rows ? playlists[0] : null))
-        .catch(error => res.status(status.BAD_REQUEST).send(error));
-});
-
-router.delete('/:id', (req, res) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    let token = req.header('Authorization');
-    //Do something with token and get user id
-    let userId = 'd9886952-0d27-43bd-aa19-1c9c3900411d';
-
-    models.playlist.destroy({
-        where: {
-            id: req.params.id,
-            userId: userId
-        }
-    })
-        .then(rows => res.status(rows ? status.OK : status.NOT_FOUND).send())
-        .catch(error => res.status(status.BAD_REQUEST).send(error));
+router.delete('/:id', authorization, async (req, res) => {
+    try {
+        let rows = await models.playlist.destroy({
+            where: {
+                id: req.params.id,
+                userId: req.userId
+            }
+        });
+        res.status(rows ? status.OK : status.NOT_FOUND).send();
+    } catch (error) {
+        res.status(status.BAD_REQUEST).send(error);
+    }
 });
 
 router.use('/:playlistId/songs', require('./songs'));

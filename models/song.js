@@ -1,5 +1,5 @@
-var database = require('../db/database');
-var types = require('sequelize').DataTypes;
+const database = require('../db/database');
+const types = require('sequelize').DataTypes;
 module.exports.Song = database.define('song', {
         id: {
             type: types.UUID,
