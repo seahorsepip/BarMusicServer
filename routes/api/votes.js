@@ -41,10 +41,13 @@ router.post('/', async (req, res) => {
                 where: {
                     id: req.body.songId
                 }
-            }]
+            }],
+            order: [
+                ['createdAt', 'DESC']
+            ]
         });
-        if (previousVote && moment().subtract(12, 'hours').isBefore(previousVote.createdAt)) {
-            throw 'Error: you already voted for this song, try again later';
+        if (previousVote && new Date(previousVote.createdAt) > new Date(Date.now() - 1000 * 60 * 60 * 12)) {
+            throw new Error('You already voted for this song, try again later');
         }
         let vote = await models.vote.create(req.body, {
             validate: true,
